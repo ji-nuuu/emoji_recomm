@@ -18,7 +18,8 @@ from emoji import demojize
 if "twitter_data" not in os.listdir():
   os.mkdir("twitter_data")
 os.chdir("twitter_data")
-os.listdir()
+print(os.listdir())
+
 
 # 트위터 API에 접근하기 위한 개인 키를 입력
 with open("dev_keys.txt","r") as f:
@@ -52,7 +53,7 @@ count = 100
 days = 10
 
 #가져올 이모지 개수 지정
-num_emojis = 99
+num_emojis = 1
     
 # 날짜 설정해주기e
 get_today()
@@ -74,6 +75,7 @@ print(len(name_list), len(emoji_list))
 cnt = 0
 
 for emoji, name in emoji_to_name.items():
+
     if cnt == num_emojis :
       break
     cnt+=1
@@ -82,30 +84,31 @@ for emoji, name in emoji_to_name.items():
 
     keyword = emoji + search_form
     print(emoji)
-    for n in range(days):
-        date = today - datetime.timedelta(days = n) # n일 전
-        date = date.strftime(f"%Y{dash}%m{dash}%d{blank}").strip()
+    for i in range(5):
+        for n in range(days):
+            date = today - datetime.timedelta(days = n) # n일 전
+            date = date.strftime(f"%Y{dash}%m{dash}%d{blank}").strip()
 
-        tweets = api.search(q = keyword, result_type = "past", until = date, lang = "ko", count = count)
-        data = {}
-        tweet_set = set() # 중복 제거용 집합 생성
+            tweets = api.search_tweets(q = keyword, result_type = "past", until = date, lang = "ko", count = count)
+            data = {}
+            tweet_set = set() # 중복 제거용 집합 생성
 
-        for tweet in tweets:
-            tweet = tweet.text
-            tweet = re.sub('[-=+,#/\?:^.@*\"※~ㆍ!』‘|\(\)\[\]`\'…》\”\“\’·/&]', '', tweet)
-            tweet = re.sub('[A-z]', '', tweet)
-            tweet = re.sub('[\n]', ' ', tweet)
-            tweet = tweet.strip()
-            #print(tweet)
-            tweet_set.add(tweet)
+            for tweet in tweets:
+                tweet = tweet.text
+                tweet = re.sub('[-=+,#/\?:^.@*\"※~ㆍ!』‘|\(\)\[\]`\'…》\”\“\’·/&]', '', tweet)
+                tweet = re.sub('[A-z]', '', tweet)
+                tweet = re.sub('[\n]', ' ', tweet)
+                tweet = tweet.strip()
+                #print(tweet)
+                tweet_set.add(tweet)
 
-        tweet_list = list(tweet_set)
-        index = list(range(len(tweet_list)))
-        data["tweet"] = tweet_list
-        df = pd.DataFrame(data)
-        df_list.append(df)
-        
-        print(date, df.shape, api.rate_limit_status()['resources']['search']['/search/tweets'])
+            tweet_list = list(tweet_set)
+            index = list(range(len(tweet_list)))
+            data["tweet"] = tweet_list
+            df = pd.DataFrame(data)
+            df_list.append(df)
+
+            print(date, df.shape, api.rate_limit_status()['resources']['search']['/search/tweets'])
     
     file_name = name[1:-1] +".csv"
     df = pd.concat(df_list)
@@ -115,3 +118,5 @@ for n in range(num_emojis):
   file_name = name_list[n][1:-1] + ".csv"
   df = pd.read_csv(file_name, encoding = 'utf-8')
   print(df)
+
+  print(df.duplicated().sum())
