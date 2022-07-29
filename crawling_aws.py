@@ -18,24 +18,17 @@ from emoji import demojize
 if "twitter_data" not in os.listdir():
   os.mkdir("twitter_data")
 os.chdir("twitter_data")
-print(os.listdir())
-
+os.listdir()
 
 # 트위터 API에 접근하기 위한 개인 키를 입력
 with open("dev_keys.txt","r") as f:
-  consumer_key = f.readline().split()[-1][1:-1]
-  consumer_secret = f.readline().split()[-1][1:-1]
-  access_token = f.readline().split()[-1][1:-1]
-  access_token_secret = f.readline().split()[-1][1:-1]
+  bearer_token = f.readline().split()[-1][1:-1]
 
 # OAuth 핸들러 생성 & 개인정보 인증 요청
-auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
-
-# 액세스 요청
-auth.set_access_token(access_token, access_token_secret)
+auth = tweepy.OAuth2BearerHandler(bearer_token)
 
 # api instace 생성
-api = tweepy.API(auth)
+api = tweepy.API(auth, wait_on_rate_limit = True)
 
 # 현재시간 구하기 + 값 출력하기
 def get_today():
@@ -46,16 +39,17 @@ def get_today():
 search_form = " -filter:retweets"
 # keyword = input("키워드를 입력하거라...")
 
-# 가져올 트윗 개수 지정(최대 100개, Default는 15개)
+# 하루당 가져올 트윗 개수 지정(한 request 당 count개, 총 num_tweets 개.)
 count = 100
+num_tweets = 400 # request 한도인 450 request까지 요청 가능, 총 45,000개 트윗
 
 #가져올 날짜 수 지정
 days = 10
 
 #가져올 이모지 개수 지정
-num_emojis = 1
-    
-# 날짜 설정해주기e
+num_emojis = 30
+
+# 날짜 설정해주기
 get_today()
 dash = "-"
 blank = ""
@@ -75,7 +69,6 @@ print(len(name_list), len(emoji_list))
 cnt = 0
 
 for emoji, name in emoji_to_name.items():
-
     if cnt == num_emojis :
       break
     cnt+=1
@@ -84,39 +77,37 @@ for emoji, name in emoji_to_name.items():
 
     keyword = emoji + search_form
     print(emoji)
-    for i in range(5):
-        for n in range(days):
-            date = today - datetime.timedelta(days = n) # n일 전
-            date = date.strftime(f"%Y{dash}%m{dash}%d{blank}").strip()
+    for n in range(days):
+        date = today - datetime.timedelta(days = n) # n일 전
+        date = date.strftime(f"%Y{dash}%m{dash}%d{blank}").strip()
 
-            tweets = api.search_tweets(q = keyword, result_type = "past", until = date, lang = "ko", count = count)
-            data = {}
-            tweet_set = set() # 중복 제거용 집합 생성
+        tweets = tweepy.Cursor(api.search_tweets, q = keyword, result_type = "past",
+                                    until = date, lang = "ko", count = count).items(num_tweets)
+        data = {}
+        tweet_set = set() # 중복 제거용 집합 생성
 
-            for tweet in tweets:
-                tweet = tweet.text
-                tweet = re.sub('[-=+,#/\?:^.@*\"※~ㆍ!』‘|\(\)\[\]`\'…》\”\“\’·/&]', '', tweet)
-                tweet = re.sub('[A-z]', '', tweet)
-                tweet = re.sub('[\n]', ' ', tweet)
-                tweet = tweet.strip()
-                #print(tweet)
-                tweet_set.add(tweet)
+        for tweet in tweets:
+            tweet = tweet.text
+            tweet = re.sub('[-=+,#/\?:^.@*\"※~ㆍ!』‘|\(\)\[\]`\'…》\”\“\’·/&]', '', tweet)
+            tweet = re.sub('[A-z]', '', tweet)
+            tweet = re.sub('[\n]', ' ', tweet)
+            tweet = tweet.strip()
+            #print(tweet)
+            tweet_set.add(tweet)
 
-            tweet_list = list(tweet_set)
-            index = list(range(len(tweet_list)))
-            data["tweet"] = tweet_list
-            df = pd.DataFrame(data)
-            df_list.append(df)
-
-            print(date, df.shape, api.rate_limit_status()['resources']['search']['/search/tweets'])
+        tweet_list = list(tweet_set)
+        index = list(range(len(tweet_list)))
+        data["tweet"] = tweet_list
+        df = pd.DataFrame(data)
+        df_list.append(df)
+        
+        print(date, df.shape, api.rate_limit_status()['resources']['search']['/search/tweets'])
     
-    file_name = name[1:-1] +".csv"
-    df = pd.concat(df_list)
-    df.to_csv(file_name, mode='w')
+        file_name = name[1:-1] + date.strftime("_%m-%d") +".csv"
+        df = pd.concat(df_list)
+        df.to_csv(file_name, mode='w')
 
 for n in range(num_emojis):
   file_name = name_list[n][1:-1] + ".csv"
   df = pd.read_csv(file_name, encoding = 'utf-8')
   print(df)
-
-  print(df.duplicated().sum())
