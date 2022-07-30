@@ -71,7 +71,12 @@ from git import Repo
 PATH_OF_GIT_REPO = "~/emoji_recomm/twitter_data"  # make sure .git folder is properly configured
 COMMIT_MESSAGE = "from AWS in " + str(today)
 
-repo = Repo(PATH_OF_GIT_REPO)
+git_username = "ji-nuuu"
+git_reponame = "emoji_recomm"
+url = "git@github.com:" + git_username + "/" + git_reponame
+
+repo = Repo.init(PATH_OF_GIT_REPO)
+repo.create_remote("origin", url=url)
 origin = repo.remote(name='origin')
 
 def git_push():
