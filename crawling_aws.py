@@ -62,14 +62,13 @@ print(len(name_list), len(emoji_list))
 
 from git import Repo
 
-PATH_OF_GIT_REPO = "~/emoji_recomm"  # make sure .git folder is properly configured
 COMMIT_MESSAGE = "from AWS in " + str(today)
 
-repo = Repo.init(PATH_OF_GIT_REPO)
+repo = Repo.init()
 origin = repo.remote(name='origin')
 
 def git_push():
-      repo.git.add(update=True)
+      repo.git.add(update = True)
       repo.index.commit(COMMIT_MESSAGE)
       repo.git.push("--set-upstream", origin, repo.head.ref)
 
