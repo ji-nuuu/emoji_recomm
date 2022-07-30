@@ -1,2 +1,0 @@
-this is test.
-from aws linux2 server 220730
