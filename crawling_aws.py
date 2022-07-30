@@ -68,18 +68,16 @@ print(len(name_list), len(emoji_list))
 
 from git import Repo
 
-PATH_OF_GIT_REPO = ""  # make sure .git folder is properly configured
-COMMIT_MESSAGE = ''
+PATH_OF_GIT_REPO = "~/emoji_recomm/twitter_data"  # make sure .git folder is properly configured
+COMMIT_MESSAGE = "from AWS in " + str(today)
+
+repo = Repo(PATH_OF_GIT_REPO)
+origin = repo.remote(name='origin')
 
 def git_push():
-    try:
-        repo = Repo(PATH_OF_GIT_REPO)
-        repo.git.add(update=True)
-        repo.index.commit(COMMIT_MESSAGE)
-        origin = repo.remote(name='origin')
-        origin.push()
-    except:
-        print('Some error occured while pushing the code')    
+      repo.git.add(update=True)
+      repo.index.commit(COMMIT_MESSAGE)
+      repo.git.push("--set-upstream", origin, repo.head.ref)
 
 git_push()
 
@@ -120,7 +118,7 @@ for emoji, name in emoji_to_name.items():
         
         print(date, df.shape, api.rate_limit_status()['resources']['search']['/search/tweets'])
     
-        file_name = name[1:-1] + date.strftime("_%m-%d") +".csv"
+        file_name = name[1:-1] + (today - datetime.timedelta(days = n)).strftime("_%m-%d") +".csv"
         df = pd.concat(df_list)
         df.to_csv(file_name, mode='w')
 
