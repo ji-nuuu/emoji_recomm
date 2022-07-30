@@ -1,0 +1,5 @@
+bearer_token = “AAAAAAAAAAAAAAAAAAAAACzjfAEAAAAAHfIAJ5yCHrtClPu6Nb6u6p5t9Rw%3DamGLRzdgg1gTgP7ye449bxy7MT5wTO6XHR2IVJ0vxPeYkNvHQp”
+consumer_key = "Km2D61fDapXrt9XPe6bIY79dr"
+consumer_secret = "JLMTwlyywr8T8TmyEPfugYUVRQSFrxmr2VbN6bsaPMcxFfBMEH" 
+access_token = "1551576514671439875-V5wSuC8RHaKtZzewcFd54IgXJBfxuG"
+access_token_secret = "hMsHYxajXBvD7VEcuhZS27T6UNXF4ytY2YBki8OAeTTZV"

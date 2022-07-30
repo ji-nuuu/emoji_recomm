@@ -41,7 +41,7 @@ search_form = " -filter:retweets"
 
 # 하루당 가져올 트윗 개수 지정(한 request 당 count개, 총 num_tweets 개.)
 count = 100
-num_tweets = 400 # request 한도인 450 request까지 요청 가능, 총 45,000개 트윗
+num_tweets = 4000 # request 한도인 450 request까지 요청 가능, 총 45,000개 트윗
 
 #가져올 날짜 수 지정
 days = 10
@@ -65,6 +65,23 @@ emoji_to_name = dict(zip(emoji_list,name_list))
 print(emoji_to_name)
 
 print(len(name_list), len(emoji_list))
+
+from git import Repo
+
+PATH_OF_GIT_REPO = ""  # make sure .git folder is properly configured
+COMMIT_MESSAGE = ''
+
+def git_push():
+    try:
+        repo = Repo(PATH_OF_GIT_REPO)
+        repo.git.add(update=True)
+        repo.index.commit(COMMIT_MESSAGE)
+        origin = repo.remote(name='origin')
+        origin.push()
+    except:
+        print('Some error occured while pushing the code')    
+
+git_push()
 
 cnt = 0
 
@@ -106,6 +123,10 @@ for emoji, name in emoji_to_name.items():
         file_name = name[1:-1] + date.strftime("_%m-%d") +".csv"
         df = pd.concat(df_list)
         df.to_csv(file_name, mode='w')
+
+        git_push()
+
+        print(file_name, "pushed")
 
 for n in range(num_emojis):
   file_name = name_list[n][1:-1] + ".csv"
