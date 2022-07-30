@@ -62,13 +62,15 @@ print(len(name_list), len(emoji_list))
 
 from git import Repo
 
+PATH_OF_GIT_REPO = "twitter_data"  # make sure .git folder is properly configured
 COMMIT_MESSAGE = "from AWS in " + str(today)
+os.chdir(PATH_OF_GIT_REPO)
 
-repo = Repo.init()
+repo = Repo.init(PATH_OF_GIT_REPO)
 origin = repo.remote(name='origin')
 
 def git_push():
-      repo.git.add(all = True)
+      repo.git.add(update=True)
       repo.index.commit(COMMIT_MESSAGE)
       repo.git.push("--set-upstream", origin, repo.head.ref)
 
