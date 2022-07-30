@@ -14,14 +14,8 @@ import datetime
 import os
 from emoji import demojize
 
-#저장위치
-if "twitter_data" not in os.listdir():
-  os.mkdir("twitter_data")
-os.chdir("twitter_data")
-os.listdir()
-
 # 트위터 API에 접근하기 위한 개인 키를 입력
-with open("dev_keys.txt","r") as f:
+with open("twitter_data/dev_keys.txt","r") as f:
   bearer_token = f.readline().split()[-1][1:-1]
 
 # OAuth 핸들러 생성 & 개인정보 인증 요청
@@ -68,15 +62,10 @@ print(len(name_list), len(emoji_list))
 
 from git import Repo
 
-PATH_OF_GIT_REPO = "~/emoji_recomm/twitter_data"  # make sure .git folder is properly configured
+PATH_OF_GIT_REPO = "~/emoji_recomm"  # make sure .git folder is properly configured
 COMMIT_MESSAGE = "from AWS in " + str(today)
 
-git_username = "ji-nuuu"
-git_reponame = "emoji_recomm"
-url = "git@github.com:" + git_username + "/" + git_reponame
-
 repo = Repo.init(PATH_OF_GIT_REPO)
-repo.create_remote("origin", url=url)
 origin = repo.remote(name='origin')
 
 def git_push():
@@ -125,7 +114,7 @@ for emoji, name in emoji_to_name.items():
     
         file_name = name[1:-1] + (today - datetime.timedelta(days = n)).strftime("_%m-%d") +".csv"
         df = pd.concat(df_list)
-        df.to_csv(file_name, mode='w')
+        df.to_csv("twitter_data/"+file_name, mode='w')
 
         git_push()
 
